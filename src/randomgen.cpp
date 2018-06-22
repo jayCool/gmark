@@ -25,6 +25,9 @@ ostream & operator << (ostream& stream, const distribution & dist) {
         case DISTRIBUTION::NORMAL:
             stream << "normal";
             break;
+        case DISTRIBUTION::EMPIRICAL:
+            stream << "empirical";
+            break;
         default:
             break;
     }
@@ -50,6 +53,31 @@ size_t uniform_random_generator::next() {
     return (*uniform_gen)(RANDOM_GEN);
 }
 
+  
+empirical_random_generator::empirical_random_generator(char* file_name) {
+    cout << "random generator " << file_name << endl;
+    ifstream infile(file_name);
+    size_t frequency;
+    size_t degree = 1;
+    while (infile >>  frequency){
+        for (size_t i=0; i<frequency;i++){
+            empirical_distribution.push_back(degree);
+        }
+        degree ++;
+    }
+    infile.close();
+    cout << "random generator finished" << endl;
+}
+ 
+empirical_random_generator::~empirical_random_generator() {
+          //delete empirical_distribution;
+}
+ 
+size_t empirical_random_generator::next() {
+    size_t val = empirical_distribution.back();
+    empirical_distribution.pop_back();          
+    return val;
+}
 
 normal_random_generator::~normal_random_generator() {
     delete normal_gen;
@@ -116,6 +144,11 @@ random_generator * make_generator(const distribution & distrib) {
             return new zipfian_random_generator((size_t) distrib.arg1, distrib.arg2);
         case DISTRIBUTION::UNDEFINED:
             return NULL;
+        case DISTRIBUTION::EMPIRICAL:
+            cout << "empirical " << endl;
+            cout << distrib.file_name << endl;
+            cout << distrib << endl;
+            return new empirical_random_generator(distrib.file_name);
     }
     return NULL;
 }

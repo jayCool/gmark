@@ -19,11 +19,14 @@ namespace graph {
 
 vector<size_t> generate_random_slots(pair<size_t,size_t> range, const distribution & distrib) {
     vector<size_t> vslots;
-
+    cout << "generate_random_slots: " << distrib.file_name << endl;
+    
     random_generator * gen = make_generator(distrib);
     
     for (size_t node = range.first; node <= range.second; node++) {
+        cout << "add slots " << node << endl; ;
         size_t nb_slots = gen->next();
+        
         if (distrib.type == DISTRIBUTION::ZIPFIAN) {
         	nb_slots++;
         }
@@ -31,6 +34,10 @@ vector<size_t> generate_random_slots(pair<size_t,size_t> range, const distributi
             vslots.push_back(node);
         }
     }
+
+    cout << "done" << endl;
+
+
     
     delete gen;
     
@@ -87,9 +94,16 @@ void abstract_graph_writer::add_random_edges2(config::edge & c_edge) {
         c_edge.incoming_distrib.arg1 = nb_subjects;
     }
     
-    
+
+    cout << "creating slots" << endl;
+    cout << c_edge.outgoing_distrib.type << endl;
+    cout << c_edge.outgoing_distrib.file_name << endl;
+
     vector<size_t> subject_slots = generate_random_slots(node_ranges_per_type[c_edge.subject_type], c_edge.outgoing_distrib);
     vector<size_t> object_slots = generate_random_slots(node_ranges_per_type[c_edge.object_type], c_edge.incoming_distrib);
+    
+    cout << "finishing generating random slots" << endl;
+    
     size_t n = subject_slots.size();
     size_t m = object_slots.size();
     
@@ -99,6 +113,10 @@ void abstract_graph_writer::add_random_edges2(config::edge & c_edge) {
         random_shuffle(subject_slots.begin(), subject_slots.end());
         n = m;
     }
+
+
+    cout << "=============adding edges=============" << endl;
+
     for (size_t i = 0; i < n; i++) {
         add_edge(subject_slots[i], c_edge.predicate, object_slots[i]);
     }
@@ -136,9 +154,12 @@ void abstract_graph_writer::build_graph (config::config & conf, report::report &
     
     cout << "creating edges" << endl;
     for (config::edge & edge : conf.schema.edges) {
-        cout << "add random edges: " << edge.subject_type << " " << edge.predicate << " " << edge.object_type << " " << edge.multiplicity << " " << edge.outgoing_distrib << " " << edge.incoming_distrib <<endl;
+        cout << "add random edges: " << edge.subject_type << " " << edge.predicate << " " << edge.object_type << " " << edge.multiplicity << " ;" << endl;
+        cout << edge.outgoing_distrib.file_name << " " << edge.incoming_distrib.file_name <<endl;
         add_random_edges(edge);
     }
+
+    cout << "creating remaining edges" << endl;
     
     for (size_t predicate = 0; predicate < conf.predicates.size(); predicate++) {
         if(created_edges[predicate] < conf.predicates[predicate].size[graphNumber]) {
@@ -147,6 +168,10 @@ void abstract_graph_writer::build_graph (config::config & conf, report::report &
         }
     }
 
+
+    cout << "done creating remaining edges" << endl;
+    
+    
     rep.nb_edges = nb_edges; 
     rep.predicates.resize(nb_edges_by_type.size());
     for (size_t i = 0; i < nb_edges_by_type.size(); i++) {
@@ -156,6 +181,8 @@ void abstract_graph_writer::build_graph (config::config & conf, report::report &
 
     gettimeofday(&tend,NULL);
     rep.exec_time=((double)(1000*(tend.tv_sec-tbegin.tv_sec)+((tend.tv_usec-tbegin.tv_usec)/1000)))/1000.;
+    
+    cout << "done graph building" << endl;
 }
 
 void abstract_graph_writer::add_vertices(size_t type, size_t size) {
@@ -187,6 +214,6 @@ void ntriple_graph_writer::print_edge(size_t subject, size_t predicate, size_t o
     else
         *stream << predicate;
     *stream << " " << object << "\n";
-//    stream->flush();
+    stream->flush();
 }
 }

@@ -26,7 +26,6 @@ int parse_config(const string & filename, config::config & conf) {
     	    conf.nb_graphs = 1;
     	}
     }
-//    pugi::xml_node graph_node = root.child("graph");
 
     if (conf.nb_nodes[0] == -1) {
     	conf.nb_nodes.resize(conf.nb_graphs);
@@ -38,7 +37,6 @@ int parse_config(const string & filename, config::config & conf) {
 				cout << "Number of graphs is greater than specified by the size" << endl;
 			}
 			conf.nb_nodes[i] = graph_node.child("nodes").text().as_uint();
-//			cout << "Graph " << i << ": " << conf.nb_nodes[i] << endl;
 			conf.nb_edges[i] = graph_node.child("edges").text().as_uint();
 			i++;
 		}
@@ -133,8 +131,6 @@ void parse_types(pugi::xml_node node, config::config & conf) {
         	if (proportion * conf.nb_nodes[i] > 0 && conf.types[id].size[i] == 0) {
 				conf.types[id].size[i] = 1;
 			}
-//        	cout << "i: " << i << ". Graphsize: " << conf.nb_nodes[i] << ": ";
-//        	cout << "Type " << conf.types[id].alias << ": " << conf.types[id].size[i] << endl;
         }
         conf.types[id].scalable = true;
         conf.types[id].proportion = proportion;
@@ -212,12 +208,13 @@ void parse_schema(pugi::xml_node node, config::config & conf) {
 			}
 
 
+            /*
             if (multiplicity == '1') { // && outdistribution.type == DISTRIBUTION::UNDEFINED) {
                 outdistribution = distribution(DISTRIBUTION::UNIFORM, 1, 1);
             }
             else if (multiplicity == '?') {// && outdistribution.type == DISTRIBUTION::UNDEFINED) {
                 outdistribution = distribution(DISTRIBUTION::UNIFORM, 0, 1);
-            }
+            }*/
             
             if(outdistribution.type == DISTRIBUTION::UNDEFINED) {
                 outdistribution = distribution(DISTRIBUTION::ZIPFIAN, 0, 2.5);
@@ -233,7 +230,6 @@ void parse_schema(pugi::xml_node node, config::config & conf) {
         }
     }
 }
-
 
 distribution parse_distribution(pugi::xml_node node) {
     distribution dist;
@@ -257,6 +253,11 @@ distribution parse_distribution(pugi::xml_node node) {
             dist.type = DISTRIBUTION::NORMAL;
             dist.arg1 = mean;
             dist.arg2 = stddev;
+        } else if (type == "empirical"){
+            dist.type = DISTRIBUTION::EMPIRICAL;
+            cout << node.child("filename").text().as_string() << endl;
+            dist.file_name = node.child("filename").text().as_string();
+            cout << "saved: " << dist.file_name;
         }
     }
     return dist;

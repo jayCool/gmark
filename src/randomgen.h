@@ -2,6 +2,9 @@
 #define RANDOMGEN_H
 
 #include <random>
+#include <vector>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -10,6 +13,7 @@ namespace DISTRIBUTION {
         UNIFORM,
         NORMAL,
         ZIPFIAN,
+        EMPIRICAL,
         UNDEFINED
     };
 };
@@ -19,11 +23,16 @@ public:
     DISTRIBUTION::type type;
     double arg1;
     double arg2;
-    
+    char* file_name;
+
     distribution() {
         type = DISTRIBUTION::UNDEFINED;
         arg1 = 0.0;
         arg2 = 0.0;
+    }
+
+    distribution(char* distribution_file){
+        file_name = distribution_file;
     }
  
     distribution(DISTRIBUTION::type t, double a1, double a2) {
@@ -32,7 +41,6 @@ public:
         arg2 = a2;
     }
     
-
     distribution(const distribution & o) {
         type = o.type;
         arg1 = o.arg1;
@@ -67,6 +75,16 @@ public:
     ~uniform_random_generator();
     size_t next();
 };
+
+ class empirical_random_generator : public random_generator {
+ private:
+	vector<size_t> empirical_distribution;
+ 
+ public:
+     empirical_random_generator(char* distribution_file);
+     ~empirical_random_generator();
+     size_t next();
+ };
 
 class normal_random_generator : public random_generator {
 private:

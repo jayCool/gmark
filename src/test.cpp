@@ -268,11 +268,12 @@ int main(int argc, char ** argv) {
 
 			writer.build_graph(conf, rep, i);
 
-			ofstream report_stream;
+			/*ofstream report_stream;
 	        report_stream.open(report_directory + "/graph.html");
 	        html_graph_report(conf, rep, report_stream);
-
-	        graph_stream.close();
+*/
+	        cout << "before closing" << endl;
+            graph_stream.close();
 		}
     }
 
